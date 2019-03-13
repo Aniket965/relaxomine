@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 import 'VolumeSlider.dart';
 import 'SoundPlaylist.dart';
 void main() => runApp(MyApp());
+class MyApp extends StatefulWidget {
+  @override
+_MyAppState createState() => _MyAppState();
+  
+}
 
-class MyApp extends StatelessWidget {
+class _MyAppState extends State<MyApp> {
+  double currentvol = 0.75;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,7 +23,11 @@ class MyApp extends StatelessWidget {
               children: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 12, 0, 24),
-                    child: GestureVolumeSlider()),
+                    child: GestureVolumeSlider(onChanged: (double val) {
+                    setState(() {
+                      currentvol = val;
+                    });
+                    },)),
               ],
             ),
           ),
@@ -51,7 +61,7 @@ class MyApp extends StatelessWidget {
                           fontSize: 30),
                     ),
                   ),
-                 SoundPlaylist(),
+                 SoundPlaylist(sysvol:currentvol),
                 ],
               ),
             ),
