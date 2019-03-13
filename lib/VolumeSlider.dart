@@ -49,3 +49,33 @@ class VolumeSlider extends StatelessWidget {
     );
   }
 }
+class GestureVolumeSlider extends StatefulWidget {
+  @override
+  _GestureVolumeState createState() => _GestureVolumeState();
+}
+
+class _GestureVolumeState extends State<GestureVolumeSlider> {
+  double percentage = 0.5;
+  double initial = 0;
+
+  @override
+  Widget build(BuildContext context) {
+      double totalwidth = MediaQuery.of(context).size.width;
+    return GestureDetector(
+      onPanStart: (DragStartDetails details) {
+        initial = details.globalPosition.dx;
+      },
+      onPanUpdate: (DragUpdateDetails details) {
+        double distance = details.globalPosition.dx - initial;
+        double percentageAddition = distance / totalwidth ;
+        setState(() {
+          percentage = (percentage + (percentageAddition)).clamp(0.0,1.0);
+        });
+      },
+      onPanEnd: (DragEndDetails details) {
+        initial = 0.0;
+      },
+      child: VolumeSlider(percentage: this.percentage,),
+    );
+  }
+}
