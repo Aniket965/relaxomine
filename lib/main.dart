@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'VolumeSlider.dart';
-
+import 'SoundPlaylist.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -51,13 +51,7 @@ class MyApp extends StatelessWidget {
                           fontSize: 30),
                     ),
                   ),
-                  Container(
-                    // color: Colors.white,
-                    height: 300,
-                  ),
-                  Column(
-                    children: <Widget>[],
-                  )
+                 SoundPlaylist(),
                 ],
               ),
             ),
