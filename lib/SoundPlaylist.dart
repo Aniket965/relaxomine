@@ -61,7 +61,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
   String musicUri;
   PlayerState playerState = PlayerState.stopped;
   double _discreteValue = 0.0;
-  MaterialAccentColor selectColor = Colors.greenAccent;
+  MaterialAccentColor selectColor = Colors.lightBlueAccent;
   _PlaylistItemState({this.name, this.soundDetail, this.musicUri});
 
   Future playLocal(localFileName) async {
@@ -72,7 +72,14 @@ class _PlaylistItemState extends State<PlayerlistItem> {
       final bytes = soundData.buffer.asUint8List();
       await file.writeAsBytes(bytes, flush: true);
     }
-    await audioPlayer.play(file.path, isLocal: true, volume: 1);
+    setState(() {
+      playerState = PlayerState.playing;
+    });
+    await audioPlayer.play(
+      file.path,
+      isLocal: true,
+    );
+    await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
   }
 
   @override
@@ -90,11 +97,19 @@ class _PlaylistItemState extends State<PlayerlistItem> {
   Widget build(BuildContext context) {
     double barlength = MediaQuery.of(context).size.width;
     return GestureDetector(
-      onTap: () { 
-         setState(() {
-                    selectColor = Colors.blueAccent;
-        });
-        playLocal(this.musicUri);
+      onTap: () async {
+        if (playerState != PlayerState.playing) {
+          setState(() {
+            selectColor = Colors.blueAccent;
+          });
+          playLocal(this.musicUri);
+        } else {
+          setState(() {
+            selectColor = Colors.lightBlueAccent;
+            playerState =PlayerState.stopped;
+          });
+          await audioPlayer.stop();
+        }
       },
       child: Container(
         width: barlength - 112,
