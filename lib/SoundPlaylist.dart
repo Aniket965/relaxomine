@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:audioplayer/audioplayer.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -26,10 +26,13 @@ class _SoundPlaylistState extends State<SoundPlaylist> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             PlayerlistItem(
-              name: "Rain",
-              soundDetail: "MILD SOUND",
-            ),
-        
+                name: "Rain",
+                soundDetail: "MILD SOUND",
+                musicUri: "brownnoise.wav"),
+            PlayerlistItem(
+                name: "WATER",
+                soundDetail: "MILD SOUND",
+                musicUri: "water.wav"),
           ],
         ),
       ),
@@ -40,22 +43,26 @@ class _SoundPlaylistState extends State<SoundPlaylist> {
 class PlayerlistItem extends StatefulWidget {
   String name;
   String soundDetail;
-  PlayerlistItem({this.name, this.soundDetail});
-    @override
-  _PlaylistItemState createState() => _PlaylistItemState(name: this.name,soundDetail: this.soundDetail);
+  String musicUri;
+  PlayerlistItem({this.name, this.soundDetail, this.musicUri});
+  @override
+  _PlaylistItemState createState() => _PlaylistItemState(
+      name: this.name, soundDetail: this.soundDetail, musicUri: this.musicUri);
 }
 
-  enum PlayerState  {stopped,playing,paused} 
+enum PlayerState { stopped, playing, paused }
+
 class _PlaylistItemState extends State<PlayerlistItem> {
   String name;
   String soundDetail;
   Duration duration;
   Duration position;
   AudioPlayer audioPlayer;
-  String mMusicUrl = "asset://flutter_assets/assets/sound/brownnoise.wav";
+  String musicUri;
   PlayerState playerState = PlayerState.stopped;
-  _PlaylistItemState({this.name, this.soundDetail});
-
+  double _discreteValue = 0.0;
+  MaterialAccentColor selectColor = Colors.greenAccent;
+  _PlaylistItemState({this.name, this.soundDetail, this.musicUri});
 
   Future playLocal(localFileName) async {
     final dir = await getApplicationDocumentsDirectory();
@@ -65,55 +72,73 @@ class _PlaylistItemState extends State<PlayerlistItem> {
       final bytes = soundData.buffer.asUint8List();
       await file.writeAsBytes(bytes, flush: true);
     }
-    await audioPlayer.play(file.path, isLocal: true);
+    await audioPlayer.play(file.path, isLocal: true, volume: 1);
   }
 
   @override
   void initState() {
-     super.initState();
-     audioPlayer = new AudioPlayer();
+    super.initState();
+    audioPlayer = new AudioPlayer();
     //  if (mMusicUrl.startsWith('assets')) mMusicUrl = mMusicUrl.replaceFirst("assets/", "asset:///flutter_assets/assets/");
-
   }
 
   Future playSound() async {
-  await audioPlayer.play(mMusicUrl,isLocal: true);
-}
+    await audioPlayer.play(musicUri, isLocal: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     double barlength = MediaQuery.of(context).size.width;
-    return Container(
-      width: barlength - 112,
-      decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(color: Color.fromRGBO(197, 197, 197, 0.2)))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
-            child: Text(
-              this.name,
-              style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: "Montserrat",
-                  fontWeight: FontWeight.bold,
-                  fontSize: 22),
+    return GestureDetector(
+      onTap: () { 
+         setState(() {
+                    selectColor = Colors.blueAccent;
+        });
+        playLocal(this.musicUri);
+      },
+      child: Container(
+        width: barlength - 112,
+        decoration: BoxDecoration(
+            border: Border(
+                bottom: BorderSide(color: Color.fromRGBO(197, 197, 197, 0.2)))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 12, 0, 0),
+              child: Text(
+                this.name,
+                style: TextStyle(
+                    color: selectColor,
+                    fontFamily: "Montserrat",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22),
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(4, 0, 0, 12),
-            child: Text(
-              this.soundDetail,
-              style: TextStyle(
-                  color: Color.fromRGBO(197, 197, 197, 1),
-                  fontFamily: "Montserrat",
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12),
+            Padding(
+              padding: EdgeInsets.fromLTRB(4, 0, 0, 12),
+              child: Text(
+                this.soundDetail,
+                style: TextStyle(
+                    color: Color.fromRGBO(197, 197, 197, 1),
+                    fontFamily: "Montserrat",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12),
+              ),
             ),
-          ),
-          RaisedButton(child: Text("play"), onPressed: () => playLocal("brownnoise.wav"),)
-        ],
+            Slider(
+                value: this._discreteValue,
+                min: 0.0,
+                max: 1.0,
+                divisions: 10,
+                onChanged: (double value) {
+                  audioPlayer.setVolume(value);
+                  setState(() {
+                    _discreteValue = value;
+                  });
+                })
+          ],
+        ),
       ),
     );
   }
