@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'VolumeSlider.dart';
 
 void main() => runApp(MyApp());
 
@@ -48,49 +49,7 @@ class MyApp extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(0, 48, 0, 24),
-                      child: GestureDetector(
-                          onHorizontalDragEnd: (DragEndDetails details) {
-                            print("Drag Left - AddValue");
-                            print(details);
-                          },
-                          child: AnimatedContainer(
-                            duration: Duration(milliseconds: 120),
-                            decoration: new BoxDecoration(
-                                color: Color(0xffFF2576),
-                                borderRadius: new BorderRadius.only(
-                                  topRight: const Radius.circular(50.0),
-                                  bottomRight: const Radius.circular(50.0),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Color.fromRGBO(255, 37, 118, .65),
-                                      offset: Offset(0, 12),
-                                      blurRadius: 19,
-                                      spreadRadius: -4)
-                                ]),
-                            height: 56,
-                            width: 200,
-                            child: Padding(
-                                padding: EdgeInsets.all(12),
-                                child: Row(children: [
-                                  Image.asset(
-                                    "assets/images/playbutton.png",
-                                    height: 24,
-                                    alignment: Alignment.centerLeft,
-                                  ),
-                                  Padding(
-                                      padding: EdgeInsets.fromLTRB(24, 0, 0, 0),
-                                      child: Text(
-                                        "12:01:24",
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                            color: Color.fromRGBO(0, 0, 0, 0.3),
-                                            fontFamily: "Montserrat",
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 16),
-                                      ))
-                                ])),
-                          )),
+                      child: GestureVolumeSlider()
                     ),
                   ))
                 ],
@@ -99,6 +58,37 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class GestureVolumeSlider extends StatefulWidget {
+  @override
+  _GestureVolumeState createState() => _GestureVolumeState();
+}
+
+class _GestureVolumeState extends State<GestureVolumeSlider> {
+  double percentage = 0.0;
+  double initial = 0.0;
+
+  @override
+  Widget build(BuildContext context) {
+      double totalwidth = MediaQuery.of(context).size.width;
+    return GestureDetector(
+      onPanStart: (DragStartDetails details) {
+        initial = details.globalPosition.dx;
+      },
+      onPanUpdate: (DragUpdateDetails details) {
+        double distance = details.globalPosition.dx - initial;
+        double percentageAddition = distance / totalwidth ;
+        setState(() {
+          percentage = (percentage + (percentageAddition/4)).clamp(0.0, 1.0);
+        });
+      },
+      onPanEnd: (DragEndDetails details) {
+        initial = 0.0;
+      },
+      child: VolumeSlider(percentage: this.percentage,),
     );
   }
 }
