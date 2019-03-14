@@ -13,8 +13,7 @@ class VolumeSlider extends StatelessWidget {
   Widget build(BuildContext context) {
   double totalwidth = MediaQuery.of(context).size.width;
 
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 120),
+    return Container(
       decoration: new BoxDecoration(
           color: Color(0xffFF2576),
           borderRadius: new BorderRadius.only(
@@ -28,27 +27,28 @@ class VolumeSlider extends StatelessWidget {
                 blurRadius: 19,
                 spreadRadius: -4)
           ]),
-      height: 56,
+      height: 64,
       width: (totalwidth / 2) * percentage  + (totalwidth/2),
       child: Padding(
-          padding: EdgeInsets.all(12),
-          child: Row(children: [
+          padding: EdgeInsets.fromLTRB(12, 12, 12, 12),
+          child: Row(children: [ 
+        //  IconButton(icon: Icon( Icons.volume_up ,color: Colors.white )),
             Image.asset(
               "assets/images/playbutton.png",
               height: 24,
               alignment: Alignment.centerLeft,
             ),
-            Padding(
-                padding: EdgeInsets.fromLTRB(24, 0, 0, 0),
-                child: Text(
-                  "12:01:24",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                      color: Color.fromRGBO(0, 0, 0, 0.3),
-                      fontFamily: "Montserrat",
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16),
-                ))
+            // Padding(
+            //     padding: EdgeInsets.fromLTRB(24, 0, 0, 0),
+            //     child: Text(
+            //       "12:01:24",
+            //       textAlign: TextAlign.left,
+            //       style: TextStyle(
+            //           color: Color.fromRGBO(0, 0, 0, 0.3),
+            //           fontFamily: "Montserrat",
+            //           fontWeight: FontWeight.w900,
+            //           fontSize: 16),
+            //     ))
           ])),
     );
   }
@@ -74,9 +74,9 @@ class _GestureVolumeState extends State<GestureVolumeSlider> {
         double distance = details.globalPosition.dx - initial;
         double percentageAddition = distance / totalwidth ;
         setState(() {
-          percentage = (percentage + (percentageAddition)).clamp(0.0,1.0);
+          percentage =  ((percentage +percentageAddition)/2).clamp(0.0,1.0);
         });
-        systemVolume.change((percentage + (percentageAddition)).clamp(0.0,1.0));
+        systemVolume.change((percentage +percentageAddition)/2 ).clamp(0.0,1.0);
       },
       onPanEnd: (DragEndDetails details) {
         initial = 0.0;

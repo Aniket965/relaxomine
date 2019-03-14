@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Padding(
-                    padding: EdgeInsets.fromLTRB(0, 12, 0, 24),
+                    padding: EdgeInsets.fromLTRB(0, 12, 0, 36),
                     child: GestureVolumeSlider(),
                 )
                 ],
