@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'VolumeSlider.dart';
 import 'SoundPlaylist.dart';
+
+
 void main() => runApp(MyApp());
 class MyApp extends StatefulWidget {
   @override
@@ -10,6 +12,7 @@ _MyAppState createState() => _MyAppState();
 
 class _MyAppState extends State<MyApp> {
   double currentvol = 0.75;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,12 +26,9 @@ class _MyAppState extends State<MyApp> {
               children: <Widget>[
                 Padding(
                     padding: EdgeInsets.fromLTRB(0, 12, 0, 24),
-                    child: GestureVolumeSlider(onChanged: (double val) {
-                    setState(() {
-                      currentvol = val;
-                    });
-                    },)),
-              ],
+                    child: GestureVolumeSlider(),
+                )
+                ],
             ),
           ),
           body: SizedBox.expand(

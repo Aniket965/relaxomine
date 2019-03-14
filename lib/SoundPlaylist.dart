@@ -4,19 +4,16 @@ import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'SystemVolume.dart';
 
 class SoundPlaylist extends StatefulWidget {
-  double sysvol;
-  SoundPlaylist({
-    this.sysvol,
-  });
+
   @override
-  _SoundPlaylistState createState() => _SoundPlaylistState(sysvol:this.sysvol);
+  _SoundPlaylistState createState() => _SoundPlaylistState();
 }
 
 class _SoundPlaylistState extends State<SoundPlaylist> {
-  double sysvol;
-  _SoundPlaylistState({this.sysvol});
+  _SoundPlaylistState();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,12 +29,10 @@ class _SoundPlaylistState extends State<SoundPlaylist> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             PlayerlistItem(
-                sysvol:this.sysvol,
                 name: "Rain",
                 soundDetail: "MILD SOUND",
                 musicUri: "brownnoise.wav"),
             PlayerlistItem(
-                 sysvol:this.sysvol,
                 name: "WATER",
                 soundDetail: "MILD SOUND",
                 musicUri: "water.wav"),
@@ -52,11 +47,10 @@ class PlayerlistItem extends StatefulWidget {
   String name;
   String soundDetail;
   String musicUri;
-  double sysvol;
-  PlayerlistItem({this.name, this.soundDetail, this.musicUri,this.sysvol});
+  PlayerlistItem({this.name, this.soundDetail, this.musicUri});
   @override
   _PlaylistItemState createState() => _PlaylistItemState(
-      name: this.name, soundDetail: this.soundDetail, musicUri: this.musicUri, sysvol:this.sysvol) ;
+      name: this.name, soundDetail: this.soundDetail, musicUri: this.musicUri) ;
 }
 
 enum PlayerState { stopped, playing, paused }
@@ -69,10 +63,10 @@ class _PlaylistItemState extends State<PlayerlistItem> {
   AudioPlayer audioPlayer;
   String musicUri;
   PlayerState playerState = PlayerState.stopped;
-  double _discreteValue = 0.0;
+  double _discreteValue = 0.5;
+  double sysvoll = 0.75;
   MaterialAccentColor selectColor = Colors.lightBlueAccent;
-  double sysvol;
-  _PlaylistItemState({this.name, this.soundDetail, this.musicUri,this.sysvol});
+  _PlaylistItemState({this.name, this.soundDetail, this.musicUri,});
  
 
   Future playLocal(localFileName) async {
@@ -97,6 +91,13 @@ class _PlaylistItemState extends State<PlayerlistItem> {
   void initState() {
     super.initState();
     audioPlayer = new AudioPlayer();
+
+    systemVolume.stream$.listen((val) {
+      setState(() {
+        sysvoll = val;
+      });
+      audioPlayer.setVolume( this._discreteValue * val);
+    } );
     //  if (mMusicUrl.startsWith('assets')) mMusicUrl = mMusicUrl.replaceFirst("assets/", "asset:///flutter_assets/assets/");
   }
 
@@ -158,7 +159,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
                 max: 1.0,
                 divisions: 10,
                 onChanged: (double value) {
-                  audioPlayer.setVolume(value * this.sysvol);
+                  audioPlayer.setVolume(value * this.sysvoll) ;
                   setState(() {
                     _discreteValue = value ;
                   });

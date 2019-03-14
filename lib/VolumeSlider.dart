@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'SystemVolume.dart';
 class VolumeSlider extends StatelessWidget {
     double percentage;
 
@@ -54,19 +54,17 @@ class VolumeSlider extends StatelessWidget {
   }
 }
 class GestureVolumeSlider extends StatefulWidget {
-  final onChanged;
-  GestureVolumeSlider({this.onChanged});
+  GestureVolumeSlider();
   @override
-  _GestureVolumeState createState() => _GestureVolumeState(onChanged: this.onChanged);
+  _GestureVolumeState createState() => _GestureVolumeState();
 }
 
 class _GestureVolumeState extends State<GestureVolumeSlider> {
   double percentage = 0.5;
   double initial = 0;
-  final onChanged;
-  _GestureVolumeState({this.onChanged});
   @override
   Widget build(BuildContext context) {
+
       double totalwidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onPanStart: (DragStartDetails details) {
@@ -78,8 +76,7 @@ class _GestureVolumeState extends State<GestureVolumeSlider> {
         setState(() {
           percentage = (percentage + (percentageAddition)).clamp(0.0,1.0);
         });
-
-        this.onChanged((percentage + (percentageAddition)).clamp(0.0,1.0));
+        systemVolume.change((percentage + (percentageAddition)).clamp(0.0,1.0));
       },
       onPanEnd: (DragEndDetails details) {
         initial = 0.0;
