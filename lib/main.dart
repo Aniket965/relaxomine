@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
                           fontSize: 30),
                     ),
                   ),
-                 SoundPlaylist(sysvol:currentvol),
+                 SoundPlaylist(),
                 ],
               ),
             ),
