@@ -46,7 +46,10 @@ flutter:
    - assets/images/playbutton.png
    - assets/images/sound.png
    - assets/brownnoise.wav
-   - assets/water.wav
+   - assets/stream.mp4
+   - assets/cicadas.mp4
+   - assets/chimesmetal.mp4
+   - assets/birds.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

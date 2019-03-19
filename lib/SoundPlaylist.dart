@@ -28,19 +28,41 @@ class _SoundPlaylistState extends State<SoundPlaylist> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             PlayerlistItem(
+                r: 147,
+                g: 45,
+                b: 31,
+                name: "Brown Noise",
+                soundDetail: "CALM SOUND",
+                musicUri: "brownnoise.wav"),
+            PlayerlistItem(
                 r: 63,
                 g: 64,
                 b: 245,
-                name: "Rain",
-                soundDetail: "MILD SOUND",
-                musicUri: "brownnoise.wav"),
+                name: "Stream",
+                soundDetail: "RUNNING WATER",
+                musicUri: "stream.mp4"),
             PlayerlistItem(
-                r: 145,
-                g: 0,
-                b: 202,
-                name: "WATER",
+                r: 6,
+                g: 157,
+                b: 116,
+                name: "Cicadas",
                 soundDetail: "MILD SOUND",
-                musicUri: "water.wav"),
+                musicUri: "cicadas.mp4"),
+            PlayerlistItem(
+                r: 255,
+                g: 134,
+                b: 57,
+                name: "Metal",
+                soundDetail: "CHIME SOUND",
+                musicUri: "chimesmetal.mp4"),
+            PlayerlistItem(
+                r: 243,
+                g: 70,
+                b: 70,
+                name: "BIRDS",
+                soundDetail: "MORING SOUNDS",
+                musicUri: "birds.ogg"),
+          
           ],
         ),
       ),
@@ -206,21 +228,23 @@ class _PlaylistItemState extends State<PlayerlistItem> {
                         ((percentage + percentageAddition) / 2).clamp(0.0, 1.0);
                   });
 
-                  audioPlayer.setVolume(((percentage + percentageAddition) / 2).clamp(0.0, 1.0) * this.sysvoll);
+                  audioPlayer.setVolume(
+                      ((percentage + percentageAddition) / 2).clamp(0.0, 1.0) *
+                          this.sysvoll);
                 },
                 onPanEnd: (DragEndDetails details) {
                   initial = 0.0;
                 },
-                onTap: ()  async {
+                onTap: () async {
                   setState(() {
                     _isSelected = false;
-                playerState = PlayerState.stopped;
+                    playerState = PlayerState.stopped;
                   });
                   await audioPlayer.stop();
                 },
                 child: Container(
                   height: 67,
-                  width: (barlength / 2) * percentage  + (barlength/2),
+                  width: (barlength / 2) * percentage + (barlength / 2),
                   decoration: new BoxDecoration(
                       color: Color.fromRGBO(this.r, this.g, this.b, 1),
                       borderRadius: new BorderRadius.only(
