@@ -18,54 +18,53 @@ class _SoundPlaylistState extends State<SoundPlaylist> {
     return Container(
       margin: EdgeInsets.fromLTRB(24, 0, 0, 0),
       child: Container(
-        padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(24), topLeft: Radius.circular(24)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            PlayerlistItem(
-                r: 147,
-                g: 45,
-                b: 31,
-                name: "Brown Noise",
-                soundDetail: "CALM SOUND",
-                musicUri: "brownnoise.wav"),
-            PlayerlistItem(
-                r: 63,
-                g: 64,
-                b: 245,
-                name: "Stream",
-                soundDetail: "RUNNING WATER",
-                musicUri: "stream.mp4"),
-            PlayerlistItem(
-                r: 6,
-                g: 157,
-                b: 116,
-                name: "Cicadas",
-                soundDetail: "MILD SOUND",
-                musicUri: "cicadas.mp4"),
-            PlayerlistItem(
-                r: 255,
-                g: 134,
-                b: 57,
-                name: "Metal",
-                soundDetail: "CHIME SOUND",
-                musicUri: "chimesmetal.mp4"),
-            PlayerlistItem(
-                r: 243,
-                g: 70,
-                b: 70,
-                name: "BIRDS",
-                soundDetail: "MORING SOUNDS",
-                musicUri: "birds.ogg"),
-          
-          ],
-        ),
-      ),
+          padding: EdgeInsets.fromLTRB(0, 24, 0, 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24), topLeft: Radius.circular(24)),
+          ),
+          height: MediaQuery.of(context).size.height / 1.75,
+          child: new ListView(
+            scrollDirection: Axis.vertical,
+            children: <Widget>[
+              PlayerlistItem(
+                  r: 147,
+                  g: 45,
+                  b: 31,
+                  name: "Brown Noise",
+                  soundDetail: "CALM SOUND",
+                  musicUri: "brownnoise.wav"),
+              PlayerlistItem(
+                  r: 63,
+                  g: 64,
+                  b: 245,
+                  name: "Stream",
+                  soundDetail: "RUNNING WATER",
+                  musicUri: "stream.mp4"),
+              PlayerlistItem(
+                  r: 6,
+                  g: 157,
+                  b: 116,
+                  name: "Cicadas",
+                  soundDetail: "MILD SOUND",
+                  musicUri: "cicadas.mp4"),
+              PlayerlistItem(
+                  r: 255,
+                  g: 134,
+                  b: 57,
+                  name: "Metal",
+                  soundDetail: "CHIME SOUND",
+                  musicUri: "chimesmetal.mp4"),
+              PlayerlistItem(
+                  r: 243,
+                  g: 70,
+                  b: 70,
+                  name: "BIRDS",
+                  soundDetail: "MORING SOUNDS",
+                  musicUri: "birds.ogg"),
+            ],
+          )),
     );
   }
 }
