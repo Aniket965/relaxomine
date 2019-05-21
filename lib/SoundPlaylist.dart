@@ -5,11 +5,30 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'SystemVolume.dart';
+import 'package:audio_service/audio_service.dart';
 
 class SoundPlaylist extends StatefulWidget {
   @override
   _SoundPlaylistState createState() => _SoundPlaylistState();
 }
+
+MediaControl playControl = MediaControl(
+  androidIcon: 'drawable/ic_action_play_arrow',
+  label: 'Play',
+  action: MediaAction.play,
+);
+MediaControl pauseControl = MediaControl(
+  androidIcon: 'drawable/ic_action_pause',
+  label: 'Pause',
+  action: MediaAction.pause,
+);
+MediaControl stopControl = MediaControl(
+  androidIcon: 'drawable/ic_action_stop',
+  label: 'Stop',
+  action: MediaAction.stop,
+);
+
+String path;
 
 class _SoundPlaylistState extends State<SoundPlaylist> {
   _SoundPlaylistState();
@@ -88,13 +107,110 @@ class PlayerlistItem extends StatefulWidget {
 
 enum PlayerState { stopped, playing, paused }
 
-class _PlaylistItemState extends State<PlayerlistItem> {
+class CustomAudioPlayer {
+  static const streamUri =
+      'http://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3';
+  AudioPlayer _audioPlayer = new AudioPlayer();
+  Completer _completer = Completer();
+
+  Future<void> run() async {
+    MediaItem mediaItem = MediaItem(
+        id: 'audio_1',
+        album: 'Sample Album',
+        title: 'Sample Title',
+        artist: 'Sample Artist');
+
+    AudioServiceBackground.setMediaItem(mediaItem);
+
+    var playerStateSubscription = _audioPlayer.onPlayerStateChanged
+        .where((state) => state == AudioPlayerState.COMPLETED)
+        .listen((state) {
+      stop();
+    });
+    play();
+    await _completer.future;
+    playerStateSubscription.cancel();
+  }
+
+  Future<void> rune(String url) async {
+    MediaItem mediaItem = MediaItem(
+        id: 'audio_1',
+        album: 'Sample Album',
+        title: 'Sample Title',
+        artist: 'Sample Artist');
+
+    AudioServiceBackground.setMediaItem(mediaItem);
+
+    _audioPlayer.play(url, isLocal: true);
+    AudioServiceBackground.setState(
+      controls: [pauseControl, stopControl],
+      basicState: BasicPlaybackState.playing,
+    );
+    await _completer.future;
+  }
+
+  void playPause() {
+    if (AudioServiceBackground.state.basicState == BasicPlaybackState.playing)
+      pause();
+    else
+      play();
+  }
+
+  void play() {
+    _audioPlayer.play(streamUri);
+    AudioServiceBackground.setState(
+      controls: [pauseControl, stopControl],
+      basicState: BasicPlaybackState.playing,
+    );
+  }
+
+  void pause() {
+    _audioPlayer.pause();
+    AudioServiceBackground.setState(
+      controls: [playControl, stopControl],
+      basicState: BasicPlaybackState.paused,
+    );
+  }
+
+  void stop() {
+    _audioPlayer.stop();
+    AudioServiceBackground.setState(
+      controls: [],
+      basicState: BasicPlaybackState.stopped,
+    );
+    _completer.complete();
+  }
+}
+
+void _backgroundAudioPlayerTask() async {
+  CustomAudioPlayer player = CustomAudioPlayer();
+  AudioServiceBackground.run(
+      onStart: player.run,
+      onPlay: player.play,
+      onPause: player.pause,
+      onStop: player.stop,
+      onClick: (MediaButton button) => player.playPause(),
+      onCustomAction: (String name, dynamic arguments) {
+        switch (name) {
+          case "url":
+            String url = arguments;
+            CustomAudioPlayer player = CustomAudioPlayer();
+            player.rune(url);
+            print(url);
+            break;
+        }
+      });
+}
+
+class _PlaylistItemState extends State<PlayerlistItem>
+    with WidgetsBindingObserver {
   String name;
   String soundDetail;
   Duration duration;
   Duration position;
   AudioPlayer audioPlayer;
   String musicUri;
+  File file;
   PlayerState playerState = PlayerState.stopped;
   double _discreteValue = 0.5;
   double sysvoll = 0.75;
@@ -114,14 +230,27 @@ class _PlaylistItemState extends State<PlayerlistItem> {
     this.b,
   });
 
-  Future playLocal(localFileName) async {
+  Future SaveLocal(localFileName) async {
     final dir = await getApplicationDocumentsDirectory();
-    final file = new File("${dir.path}/$localFileName");
+    file = new File("${dir.path}/$localFileName");
     if (!(await file.exists())) {
       final soundData = await rootBundle.load("assets/$localFileName");
       final bytes = soundData.buffer.asUint8List();
       await file.writeAsBytes(bytes, flush: true);
     }
+    path = file.path;
+    print(path);
+    // setState(() {
+    //   playerState = PlayerState.playing;
+    // });
+    // await audioPlayer.play(
+    //   file.path,
+    //   isLocal: true,
+    // );
+    // await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
+  }
+
+  Future playLocal(localFileName) async {
     setState(() {
       playerState = PlayerState.playing;
     });
@@ -136,7 +265,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
   void initState() {
     super.initState();
     audioPlayer = new AudioPlayer();
-
+    SaveLocal(musicUri);
     systemVolume.stream$.listen((val) {
       setState(() {
         sysvoll = val;
@@ -153,7 +282,38 @@ class _PlaylistItemState extends State<PlayerlistItem> {
         await audioPlayer.stop();
       }
     });
+    WidgetsBinding.instance.addObserver(this);
+    connect();
     //  if (mMusicUrl.startsWith('assets')) mMusicUrl = mMusicUrl.replaceFirst("assets/", "asset:///flutter_assets/assets/");
+  }
+
+  @override
+  void dispose() {
+    disconnect();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        connect();
+        break;
+      case AppLifecycleState.paused:
+        disconnect();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void connect() async {
+    await AudioService.connect();
+  }
+
+  void disconnect() {
+    AudioService.disconnect();
   }
 
   Future playSound() async {
@@ -172,7 +332,20 @@ class _PlaylistItemState extends State<PlayerlistItem> {
                 _isSelected = true;
               });
               startPlayer.play();
-              playLocal(this.musicUri);
+              // playLocal(this.musicUri);
+              await SaveLocal(musicUri);
+              bool s = await AudioService.start(
+                backgroundTask: _backgroundAudioPlayerTask,
+                resumeOnClick: true,
+                androidNotificationChannelName: 'Audio Service Demo',
+                notificationColor: 0xFF2196f3,
+                androidNotificationIcon: 'mipmap/ic_launcher',
+              );
+
+           
+                print(path);
+                AudioService.customAction('url', path);
+    
             } else {
               setState(() {
                 playerState = PlayerState.stopped;
