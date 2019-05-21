@@ -17,9 +17,20 @@ class StopPlayer {
     _stopPlayers.value = 1;
   }
 }
+class StartPlayer {
+  BehaviorSubject _startPlayer = BehaviorSubject.seeded(0);
+  Observable get stream$ => _startPlayer.stream;
+  int get current => _startPlayer.value;
+  play() {
+    _startPlayer.value = 1;
+  }
+}
+
 
 // Observer for system Volume
 SystemVolume systemVolume = SystemVolume();
 
 // Observer for stoping all Players simultaneously
 StopPlayer stopPlayer = StopPlayer();
+
+StartPlayer startPlayer = StartPlayer();

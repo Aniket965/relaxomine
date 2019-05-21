@@ -50,6 +50,7 @@ flutter:
    - assets/cicadas.mp4
    - assets/chimesmetal.mp4
    - assets/birds.ogg
+   - assets/images/stop.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.io/assets-and-images/#resolution-aware.

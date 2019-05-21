@@ -12,7 +12,21 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   double currentvol = 0.75;
+  bool isPlayed = false;
 
+
+  @override
+  void initState() {
+    super.initState();
+    startPlayer.stream$.listen((val) async {
+      if (val == 1) {
+        setState(() {
+          isPlayed = true;
+        });
+      }
+    });
+    //  if (mMusicUrl.startsWith('assets')) mMusicUrl = mMusicUrl.replaceFirst("assets/", "asset:///flutter_assets/assets/");
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -20,28 +34,37 @@ class _MyAppState extends State<MyApp> {
       home: SafeArea(
         child: Scaffold(
           bottomNavigationBar: new BottomAppBar(
-            color: Colors.black,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.fromLTRB(0, 12, 0, 36),
-                  child: FloatingActionButton(
-                    elevation: 6,
-                    highlightElevation: 7,
-                    onPressed: () => stopPlayer.stop(),
-                    child: Image.asset(
-                      "assets/images/playbutton.png",
-                      height: 24,
-                      alignment: Alignment.centerLeft,
-                    ),
-                    foregroundColor: Color(0xffFF2576),
-                    backgroundColor: Color(0xffFF2576),
-                  ),
-                )
-              ],
-            ),
-          ),
+              color: Colors.black,
+              child: isPlayed
+                  ? new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.fromLTRB(0, 12, 0, 36),
+                            child: FloatingActionButton(
+                              elevation: 6,
+                              highlightElevation: 7,
+                              onPressed: () => stopPlayer.stop(),
+                              child: Image.asset(
+                                "assets/images/stop.png",
+                                height: 24,
+                                alignment: Alignment.centerLeft,
+                              ),
+                              foregroundColor: Color(0xffFF2576),
+                              backgroundColor: Color(0xffFF2576),
+                            ))
+                      ],
+                    )
+                  : Padding(
+                      padding: EdgeInsets.fromLTRB(36, 0, 12, 36),
+                      child: Text(
+                        "To play sounds tap on any sound and slide to adjust volume of individual sounds",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "Montserrat",
+                            fontWeight: FontWeight.w900,
+                            fontSize: 10),
+                      ))),
           body: SizedBox.expand(
             child: Container(
               decoration: BoxDecoration(

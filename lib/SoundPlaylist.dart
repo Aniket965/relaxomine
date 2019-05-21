@@ -171,6 +171,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
               setState(() {
                 _isSelected = true;
               });
+              startPlayer.play();
               playLocal(this.musicUri);
             } else {
               setState(() {
