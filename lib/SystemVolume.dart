@@ -1,9 +1,10 @@
 import 'package:rxdart/rxdart.dart';
+
 class SystemVolume {
-  BehaviorSubject _volSys =BehaviorSubject.seeded(0.75);
+  BehaviorSubject _volSys = BehaviorSubject.seeded(0.75);
   Observable get stream$ => _volSys.stream;
   int get current => _volSys.value;
- change(double val) {
+  change(double val) {
     _volSys.value = val;
   }
 }
@@ -17,8 +18,8 @@ class StopPlayer {
   }
 }
 
- // Observer for system Volume
- SystemVolume systemVolume = SystemVolume();
- 
+// Observer for system Volume
+SystemVolume systemVolume = SystemVolume();
+
 // Observer for stoping all Players simultaneously
- StopPlayer stopPlayer = StopPlayer();
+StopPlayer stopPlayer = StopPlayer();

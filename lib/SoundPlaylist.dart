@@ -231,7 +231,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
                   initial = details.globalPosition.dx;
                 },
                 onPanUpdate: (DragUpdateDetails details) {
-                  double distance = details.globalPosition.dx - initial;
+                  double distance = details.globalPosition.dx - 20;
                   double percentageAddition = distance / barlength;
                   setState(() {
                     percentage =
