@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'VolumeSlider.dart';
+import 'SystemVolume.dart';
 import 'SoundPlaylist.dart';
 
-
 void main() => runApp(MyApp());
+
 class MyApp extends StatefulWidget {
   @override
-_MyAppState createState() => _MyAppState();
-  
+  _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -22,13 +22,24 @@ class _MyAppState extends State<MyApp> {
           bottomNavigationBar: new BottomAppBar(
             color: Colors.black,
             child: new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                    padding: EdgeInsets.fromLTRB(0, 12, 0, 36),
-                    child: GestureVolumeSlider(),
+                  padding: EdgeInsets.fromLTRB(0, 12, 0, 36),
+                  child: FloatingActionButton(
+                    elevation: 6,
+                    highlightElevation: 7,
+                    onPressed: () => stopPlayer.stop(),
+                    child: Image.asset(
+                      "assets/images/playbutton.png",
+                      height: 24,
+                      alignment: Alignment.centerLeft,
+                    ),
+                    foregroundColor: Color(0xffFF2576),
+                    backgroundColor: Color(0xffFF2576),
+                  ),
                 )
-                ],
+              ],
             ),
           ),
           body: SizedBox.expand(
@@ -61,7 +72,7 @@ class _MyAppState extends State<MyApp> {
                           fontSize: 30),
                     ),
                   ),
-                 SoundPlaylist(),
+                  SoundPlaylist(),
                 ],
               ),
             ),

@@ -143,6 +143,16 @@ class _PlaylistItemState extends State<PlayerlistItem> {
       });
       audioPlayer.setVolume(this._discreteValue * val);
     });
+
+    stopPlayer.stream$.listen((val) async {
+      if (val == 1) {
+        setState(() {
+          playerState = PlayerState.stopped;
+          _isSelected = false;
+        });
+        await audioPlayer.stop();
+      }
+    });
     //  if (mMusicUrl.startsWith('assets')) mMusicUrl = mMusicUrl.replaceFirst("assets/", "asset:///flutter_assets/assets/");
   }
 
@@ -165,6 +175,7 @@ class _PlaylistItemState extends State<PlayerlistItem> {
             } else {
               setState(() {
                 playerState = PlayerState.stopped;
+                _isSelected = false;
               });
               await audioPlayer.stop();
             }

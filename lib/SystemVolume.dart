@@ -7,4 +7,18 @@ class SystemVolume {
     _volSys.value = val;
   }
 }
- SystemVolume systemVolume =SystemVolume();
+
+class StopPlayer {
+  BehaviorSubject _stopPlayers = BehaviorSubject.seeded(0);
+  Observable get stream$ => _stopPlayers.stream;
+  int get current => _stopPlayers.value;
+  stop() {
+    _stopPlayers.value = 1;
+  }
+}
+
+ // Observer for system Volume
+ SystemVolume systemVolume = SystemVolume();
+ 
+// Observer for stoping all Players simultaneously
+ StopPlayer stopPlayer = StopPlayer();
