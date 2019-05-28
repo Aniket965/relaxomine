@@ -108,40 +108,18 @@ class PlayerlistItem extends StatefulWidget {
 enum PlayerState { stopped, playing, paused }
 
 class CustomAudioPlayer {
-  static const streamUri =
-      'http://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3';
-  AudioPlayer _audioPlayer = new AudioPlayer();
+  List<AudioPlayer> _audioPlayer = [];
+  List<String> _urlpaths = [];
   Completer _completer = Completer();
-
-  Future<void> run() async {
+  AudioPlayer ap = new AudioPlayer();
+  Future<void> start() async {
     MediaItem mediaItem = MediaItem(
         id: 'audio_1',
-        album: 'Sample Album',
-        title: 'Sample Title',
-        artist: 'Sample Artist');
+        album: 'Relaxamine',
+        title: 'Relaxamine',
+        artist: 'Scibots');
 
     AudioServiceBackground.setMediaItem(mediaItem);
-
-    var playerStateSubscription = _audioPlayer.onPlayerStateChanged
-        .where((state) => state == AudioPlayerState.COMPLETED)
-        .listen((state) {
-      stop();
-    });
-    play();
-    await _completer.future;
-    playerStateSubscription.cancel();
-  }
-
-  Future<void> rune(String url) async {
-    MediaItem mediaItem = MediaItem(
-        id: 'audio_1',
-        album: 'Sample Album',
-        title: 'Sample Title',
-        artist: 'Sample Artist');
-
-    AudioServiceBackground.setMediaItem(mediaItem);
-
-    _audioPlayer.play(url, isLocal: true);
     AudioServiceBackground.setState(
       controls: [pauseControl, stopControl],
       basicState: BasicPlaybackState.playing,
@@ -149,15 +127,26 @@ class CustomAudioPlayer {
     await _completer.future;
   }
 
+  Future<void> rune(String url) async {
+    AudioPlayer _newAudioPlayer = AudioPlayer();
+    _urlpaths.add(url);
+    _audioPlayer.add(_newAudioPlayer);
+    _newAudioPlayer.play(url, isLocal: true);
+
+    AudioServiceBackground.setState(
+      controls: [pauseControl, stopControl],
+      basicState: BasicPlaybackState.playing,
+    );
+  }
+
   void playPause() {
-    if (AudioServiceBackground.state.basicState == BasicPlaybackState.playing)
-      pause();
-    else
-      play();
+    pause();
   }
 
   void play() {
-    _audioPlayer.play(streamUri);
+    for (var i = 0; i < _audioPlayer.length; i++) {
+      _audioPlayer[i].play(_urlpaths[i], isLocal: true);
+    }
     AudioServiceBackground.setState(
       controls: [pauseControl, stopControl],
       basicState: BasicPlaybackState.playing,
@@ -165,7 +154,10 @@ class CustomAudioPlayer {
   }
 
   void pause() {
-    _audioPlayer.pause();
+    print("pcalled");
+    for (var i = 0; i < _audioPlayer.length; i++) {
+      _audioPlayer[i].pause();
+    }
     AudioServiceBackground.setState(
       controls: [playControl, stopControl],
       basicState: BasicPlaybackState.paused,
@@ -173,19 +165,31 @@ class CustomAudioPlayer {
   }
 
   void stop() {
-    _audioPlayer.stop();
+    print("scalled");
+    for (var i = 0; i < _audioPlayer.length; i++) {
+      _audioPlayer[i].stop();
+    }
+
     AudioServiceBackground.setState(
       controls: [],
       basicState: BasicPlaybackState.stopped,
     );
     _completer.complete();
   }
+
+  void kill(String path) async {
+    int i = _urlpaths.indexOf(path);
+    print('Killing ' + path);
+    await _audioPlayer[i].stop();
+    _audioPlayer.removeAt(i);
+    _urlpaths.removeAt(i);
+  }
 }
 
 void _backgroundAudioPlayerTask() async {
   CustomAudioPlayer player = CustomAudioPlayer();
   AudioServiceBackground.run(
-      onStart: player.run,
+      onStart: player.start,
       onPlay: player.play,
       onPause: player.pause,
       onStop: player.stop,
@@ -194,9 +198,12 @@ void _backgroundAudioPlayerTask() async {
         switch (name) {
           case "url":
             String url = arguments;
-            CustomAudioPlayer player = CustomAudioPlayer();
             player.rune(url);
             print(url);
+            break;
+          case "stop":
+            String url = arguments;
+            player.kill(url);
             break;
         }
       });
@@ -240,14 +247,6 @@ class _PlaylistItemState extends State<PlayerlistItem>
     }
     path = file.path;
     print(path);
-    // setState(() {
-    //   playerState = PlayerState.playing;
-    // });
-    // await audioPlayer.play(
-    //   file.path,
-    //   isLocal: true,
-    // );
-    // await audioPlayer.setReleaseMode(ReleaseMode.LOOP);
   }
 
   Future playLocal(localFileName) async {
@@ -327,12 +326,12 @@ class _PlaylistItemState extends State<PlayerlistItem>
       children: <Widget>[
         GestureDetector(
           onTap: () async {
+            print('Tapped');
             if (playerState != PlayerState.playing) {
               setState(() {
+                playerState = PlayerState.playing;
                 _isSelected = true;
               });
-              startPlayer.play();
-              // playLocal(this.musicUri);
               await SaveLocal(musicUri);
               bool s = await AudioService.start(
                 backgroundTask: _backgroundAudioPlayerTask,
@@ -342,16 +341,14 @@ class _PlaylistItemState extends State<PlayerlistItem>
                 androidNotificationIcon: 'mipmap/ic_launcher',
               );
 
-           
-                print(path);
-                AudioService.customAction('url', path);
-    
+              AudioService.customAction('url', path);
             } else {
               setState(() {
                 playerState = PlayerState.stopped;
                 _isSelected = false;
               });
-              await audioPlayer.stop();
+
+              AudioService.customAction('stop', path);
             }
           },
           child: Container(
@@ -420,11 +417,13 @@ class _PlaylistItemState extends State<PlayerlistItem>
                   initial = 0.0;
                 },
                 onTap: () async {
+                  await SaveLocal(musicUri);
                   setState(() {
-                    _isSelected = false;
                     playerState = PlayerState.stopped;
+                    _isSelected = false;
                   });
-                  await audioPlayer.stop();
+
+                  AudioService.customAction('stop', path);
                 },
                 child: Container(
                   height: 67,
