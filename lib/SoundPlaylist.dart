@@ -118,7 +118,6 @@ class CustomAudioPlayer {
         album: 'Relaxamine',
         title: 'Relaxamine',
         artist: 'Scibots');
-
     AudioServiceBackground.setMediaItem(mediaItem);
     AudioServiceBackground.setState(
       controls: [pauseControl, stopControl],
@@ -187,28 +186,73 @@ class CustomAudioPlayer {
 }
 
 void _backgroundAudioPlayerTask() async {
-  CustomAudioPlayer player = CustomAudioPlayer();
-  AudioServiceBackground.run(
-      onStart: player.start,
-      onPlay: player.play,
-      onPause: player.pause,
-      onStop: player.stop,
-      onClick: (MediaButton button) => player.playPause(),
-      onCustomAction: (String name, dynamic arguments) {
-        switch (name) {
-          case "url":
-            String url = arguments;
-            player.rune(url);
-            print(url);
-            break;
-          case "stop":
-            String url = arguments;
-            player.kill(url);
-            break;
-        }
-      });
+  AudioServiceBackground.run(() => MyBackgroundTask());
 }
+class MyBackgroundTask extends BackgroundAudioTask {
+  CustomAudioPlayer player = CustomAudioPlayer();
+  Completer _completer = Completer();
 
+  @override
+  Future<void> onStart() async {
+    // Your custom dart code to start audio playback.
+    // NOTE: The background audio task will shut down
+    // as soon as this async function completes.
+    player.start();
+    return _completer.future;
+  }
+  @override
+  void onStop() {
+    // Your custom dart code to stop audio playback. e.g.:
+    player.stop();
+    // Cause the audio task to shut down.
+    _completer.complete();
+  }
+  @override
+  void onPlay() {
+    // Your custom dart code to resume audio playback. e.g.:
+    player.play();
+    // Broadcast the state change to all user interfaces:
+  }
+  @override
+  void onPause() {
+    // Your custom dart code to pause audio playback. e.g.:
+    player.pause();
+    // Broadcast the state change to all user interfaces:
+  }
+  @override
+  void onClick(MediaButton button) {
+    // Your custom dart code to handle a click on a headset.
+    player.playPause();
+  }
+  @override
+  void onSkipToNext() {
+    // Your custom dart code to skip to the next queue item.
+  }
+  @override
+  void onSkipToPrevious() {
+    // Your custom dart code to skip to the previous queue item.
+  }
+  @override
+  void onSeekTo(int position) {
+    // Your custom dart code to seek to a position.
+  }
+
+  @override
+  void onCustomAction(String name, dynamic arguments) {
+      switch (name) {
+        case "url":
+          String url = arguments;
+          player.rune(url);
+          print(url);
+          break;
+        case "stop":
+          String url = arguments;
+          player.kill(url);
+          break;
+      }
+  }
+
+}
 class _PlaylistItemState extends State<PlayerlistItem>
     with WidgetsBindingObserver {
   String name;
@@ -334,7 +378,7 @@ class _PlaylistItemState extends State<PlayerlistItem>
               });
               await SaveLocal(musicUri);
               bool s = await AudioService.start(
-                backgroundTask: _backgroundAudioPlayerTask,
+                backgroundTaskEntrypoint: _backgroundAudioPlayerTask,
                 resumeOnClick: true,
                 androidNotificationChannelName: 'Audio Service Demo',
                 notificationColor: 0xFF2196f3,
